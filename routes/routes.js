@@ -1,7 +1,34 @@
 var faker = require("faker");
+var multer = require('multer');
 
 var appRouter = function (app) {
 
+    // file upload code
+var storage = multer.diskStorage({ //multers disk storage settings
+    destination: function (req, file, cb) {
+        cb(null, './public/uploads/')
+    },
+    filename: function (req, file, cb) {
+        // console.log(file);
+        var datetimestamp = Date.now();
+        cb(null, file.fieldname + '-' + datetimestamp + '.' + file.originalname.split('.')[file.originalname.split('.').length -1])
+    }
+});
+
+var uploadSingle = multer({ //multer settings
+    storage: storage
+}).single('file');
+
+/** API for single file upload */
+app.post('/uploadPhoto', function(req, res) {
+    uploadSingle(req,res,function(err){
+        if(err){
+             res.json({error_code:1,err_desc:err});
+             return;
+        }
+         res.json(req.file);
+    })
+});
 
 
     app.get("/", function (req, res) {
